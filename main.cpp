@@ -1,5 +1,7 @@
 # pragma warning (disable:4819)
 #include <iostream>
+#include <thread>         // std::thread
+#include <mutex>          // std::mutex
 
 using namespace std;
 
@@ -50,6 +52,84 @@ double Line::getLength( void )
 }
 
 
+
+/**
+ * facotry model
+ * @return
+ */
+
+enum class shape_type{
+    circle,triangle,rectangle
+};
+
+class shape{
+private:
+    int width;
+    int height;
+};
+
+
+class circle:public shape{
+    int radius;
+};
+
+class triangle:public shape{
+    int angle;
+};
+
+class rectange:public shape{
+    int volume;
+};
+
+
+//this one should take memory leak  we should wrap
+shape* create_shape(shape_type types){
+    switch (types){
+        case  shape_type::circle:
+            return new circle();
+        case  shape_type::triangle:
+            return new triangle();
+        case  shape_type::rectangle:
+            return new rectange();
+    }
+}
+
+//
+class shape_wrapper{
+public:
+    //construct and init ptr_=passing ptr
+    explicit shape_wrapper( shape* ptr = nullptr) : ptr_(ptr) {}
+
+    ~shape_wrapper(){
+        delete ptr_;
+    }
+
+    //const like java final cannot modify
+    shape* get() const {
+        return ptr_;
+    }
+private:
+    shape* ptr_;
+};
+
+
+
+
+std::mutex mtx;
+void some_func(){
+    mtx.lock();
+    // 做需要同步的工作……
+    // 如果发生异常或提前返回，
+    // 下面这句不会自动执行。
+    mtx.unlock();
+}
+
+
+void test(){
+    shape_wrapper wrapper=shape_wrapper(create_shape(shape_type::circle));
+}
+
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
 
@@ -67,5 +147,33 @@ int main() {
     Line line3(1,10,9);
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
