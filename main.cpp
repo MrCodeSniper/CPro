@@ -94,7 +94,7 @@ shape* create_shape(shape_type types){
     }
 }
 
-//
+//缺点 1.只适合shape类型的指针 2.指针的行为不具备 * -> 3.
 class shape_wrapper{
 public:
     //construct and init ptr_=passing ptr
@@ -113,6 +113,40 @@ private:
 };
 
 
+//表示T是一个类型， 在模版实例化时可以替换任意类型
+template <typename T>
+class smart_ptr{
+public:
+    explicit  smart_ptr(T* ptr= nullptr): ptr_(ptr){}
+
+    //拷贝函数
+    smart_ptr(const smart_ptr &obj){
+        cout << "调用拷贝构造函数并为指针 ptr 分配内存" << endl;
+        ptr_=new int;
+        *ptr_=*obj.ptr_;
+    }
+
+    ~smart_ptr(){
+        delete ptr_;
+    }
+
+
+
+
+
+    T* get() const {
+        return ptr_;
+    }
+
+    //操作符
+    T& operator*() const { return *ptr_; }
+    T* operator->() const { return ptr_; }
+    operator bool() const { return ptr_; }
+private:
+    T* ptr_;
+};
+
+
 
 
 std::mutex mtx;
@@ -127,6 +161,11 @@ void some_func(){
 
 void test(){
     shape_wrapper wrapper=shape_wrapper(create_shape(shape_type::circle));
+    smart_ptr<shape_type> ptr=smart_ptr(create_shape(shape_type::circle));
+
+    shape_type shape_type1= *ptr;
+
+
 }
 
 
